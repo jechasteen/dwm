@@ -20,6 +20,9 @@
  *
  * To understand everything else, start reading main().
  */
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -33,6 +36,7 @@
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
+#include <X11/XKBlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
@@ -1109,7 +1113,9 @@ keypress(XEvent *e)
 	XKeyEvent *ev;
 
 	ev = &e->xkey;
-	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
+    // !kkeysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
+    keysym = XkbKeycodeToKeysym(dpy, (KeyCode)ev->keycode,
+                                    0, ev->state & ShiftMask ? 1 : 0);
 	for (i = 0; i < LENGTH(keys); i++)
 		if (keysym == keys[i].keysym
 		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
@@ -1554,7 +1560,7 @@ void
 runstartscripts(void) {
 	const int len = sizeof(start_scripts) / sizeof(char*);
 	for (int i = 0; i < len; i++) {
-		const char cmd[128] = "cd ~/.config/dwm; ./";
+        char cmd[128] = "cd ~/.config/dwm; ./";
 		strcat(cmd, start_scripts[i]);
 		system(cmd);
 	}
