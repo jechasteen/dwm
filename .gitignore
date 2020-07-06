@@ -6,3 +6,4 @@
 *.includes
 *.o
 dwm
+build/**
